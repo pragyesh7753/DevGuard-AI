@@ -22,6 +22,8 @@ let aiService;
 /** @type {PanelManager} */
 let panelManager;
 
+let isAnalyzingWorkspace = false;
+
 /**
  * @param {vscode.ExtensionContext} context
  */
@@ -40,7 +42,7 @@ async function activate(context) {
   panelManager = new PanelManager(context, handleWebviewMessage);
 
   // Terminal Tracker
-  terminalTracker = new TerminalTracker(context, async (_command) => {
+  terminalTracker = new TerminalTracker(context, async () => {
     // When a terminal command completes with file changes, re-analyze
     panelManager.postMessage('terminalCommands', { data: terminalTracker.getCommands() });
     await analyzeWorkspace('command');
@@ -167,13 +169,17 @@ function handleWebviewMessage(message) {
  * Analyze all open/changed files in the workspace.
  */
 async function analyzeWorkspace(trigger) {
-  panelManager.postMessage('analyzing', {});
+  if (isAnalyzingWorkspace) return;
+  isAnalyzingWorkspace = true;
 
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders) return;
+  try {
+    panelManager.postMessage('analyzing', {});
 
-  const rootPath = workspaceFolders[0].uri.fsPath;
-  const filesToAnalyze = [];
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders) return;
+
+    const rootPath = workspaceFolders[0].uri.fsPath;
+    const filesToAnalyze = [];
 
   // Get open editors' documents
   for (const tabGroup of vscode.window.tabGroups.all) {
@@ -281,10 +287,13 @@ async function analyzeWorkspace(trigger) {
     }
   }
 
-  panelManager.postMessage('analysisResults', {
-    issues: result.issues,
-    summary: result.summary
-  });
+    panelManager.postMessage('analysisResults', {
+      issues: result.issues,
+      summary: result.summary
+    });
+  } finally {
+    isAnalyzingWorkspace = false;
+  }
 }
 
 /**

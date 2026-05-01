@@ -1,7 +1,7 @@
 import globals from "globals";
 
 export default [{
-    ignores: ["webview/**", "node_modules/**"],
+    ignores: ["webview/**", "node_modules/**", ".vscode-test/**"],
 }, {
     files: ["**/*.js"],
     languageOptions: {

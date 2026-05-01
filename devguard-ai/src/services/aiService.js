@@ -32,7 +32,7 @@ class AIService {
           if (keyMatch && !envApiKey) envApiKey = keyMatch[1].replace(/["']/g, '').trim();
           if (modelMatch && !envModel) envModel = modelMatch[1].replace(/["']/g, '').trim();
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
     };

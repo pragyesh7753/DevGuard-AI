@@ -10,6 +10,8 @@ webview/eslint.config.js
 webview/.gitignore
 webview/README.md
 .gitignore
+.env
+*.vsix
 .yarnrc
 vsc-extension-quickstart.md
 **/jsconfig.json
