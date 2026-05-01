@@ -136,7 +136,8 @@ async function activate(context) {
   // Git state changes (branch switch, etc.)
   const gitDisposable = gitService.onDidChange(() => {
     refreshGitAndTimeline();
-    analyzeWorkspace('git');
+    // Intentionally removed analyzeWorkspace('git') here because it fires on every save,
+    // causing a race condition with onDidSaveTextDocument and triggering duplicate AI calls.
   });
   if (gitDisposable) context.subscriptions.push(gitDisposable);
 
@@ -256,11 +257,9 @@ async function analyzeWorkspace(trigger) {
   // Merge with AI analysis if enabled
   if (aiService.isEnabled) {
     try {
-      // Run AI analysis on all gathered files in parallel
-      const aiPromises = filesToAnalyze.map(f => aiService.deepAnalyze(f.content, f.filePath));
-      const aiResultsArrays = await Promise.all(aiPromises);
-      
-      for (const aiIssues of aiResultsArrays) {
+      // Run AI analysis sequentially to avoid rate limiting from SambaNova/OpenAI
+      for (const f of filesToAnalyze) {
+        const aiIssues = await aiService.deepAnalyze(f.content, f.filePath);
         if (aiIssues && aiIssues.length > 0) {
           result.issues.push(...aiIssues);
           result.summary.total += aiIssues.length;

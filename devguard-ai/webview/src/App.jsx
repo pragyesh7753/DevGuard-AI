@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { RefreshCw, Shield } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useVsCode, useExtensionMessage } from './hooks/useVsCode';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -8,6 +8,7 @@ import IssueCard from './components/IssueCard';
 import FileTimeline from './components/FileTimeline';
 import TerminalLog from './components/TerminalLog';
 import Visualization from './components/Visualization';
+import logoImg from './assets/logo.png';
 
 
 const EMPTY_SUMMARY = { total: 0, critical: 0, high: 0, medium: 0, low: 0, info: 0, byCategory: {} };
@@ -124,8 +125,8 @@ export default function App() {
         {/* Header */}
         <header className="h-14 flex items-center justify-between px-6 border-b border-border-base shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-primary rounded flex items-center justify-center text-white">
-              <Shield size={14} />
+            <div className="w-6 h-6 flex items-center justify-center">
+              <img src={logoImg} alt="DevGuard AI" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-sm font-semibold tracking-tight">DevGuard AI</h1>
             {analyzing && (
@@ -167,4 +168,4 @@ export default function App() {
       </main>
     </div>
   );
-}
+}

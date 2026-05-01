@@ -5,6 +5,9 @@
 
 const vscode = require('vscode');
 
+const fs = require('fs');
+const path = require('path');
+
 class AIService {
   constructor() {
     this._enabled = false;
@@ -15,8 +18,36 @@ class AIService {
 
   _refreshConfig() {
     const config = vscode.workspace.getConfiguration('devguardAI');
-    this._apiKey = process.env.SAMBANOVA_API_KEY;
-    this._model = process.env.SAMBANOVA_MODEL || 'DeepSeek-V3';
+    let envApiKey = process.env.SAMBANOVA_API_KEY;
+    let envModel = process.env.SAMBANOVA_MODEL;
+
+    // Helper to read env file
+    const readEnv = (envPath) => {
+      try {
+        if (fs.existsSync(envPath)) {
+          const envContent = fs.readFileSync(envPath, 'utf8');
+          const keyMatch = envContent.match(/^SAMBANOVA_API_KEY=(.*)$/m);
+          const modelMatch = envContent.match(/^SAMBANOVA_MODEL=(.*)$/m);
+          
+          if (keyMatch && !envApiKey) envApiKey = keyMatch[1].replace(/["']/g, '').trim();
+          if (modelMatch && !envModel) envModel = modelMatch[1].replace(/["']/g, '').trim();
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    // 1. Try reading from .env in the target workspace (if user put it in their project)
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length > 0) {
+      readEnv(path.join(workspaceFolders[0].uri.fsPath, '.env'));
+    }
+
+    // 2. Try reading from .env in the extension's own directory (for your local F5 testing!)
+    readEnv(path.join(__dirname, '..', '..', '.env'));
+
+    this._apiKey = envApiKey || config.get('sambanovaApiKey', '');
+    this._model = envModel || config.get('sambanovaModel', 'DeepSeek-V3');
     this._enabled = !!this._apiKey;
   }
 
@@ -56,7 +87,17 @@ Respond in JSON format: { "suggestion": "corrected code", "explanation": "why th
 
     try {
       const response = await this._callApi(prompt);
-      return JSON.parse(response);
+      
+      let cleanJson = response.trim();
+      if (cleanJson.startsWith('```')) {
+        const firstNewline = cleanJson.indexOf('\n');
+        const lastBacktick = cleanJson.lastIndexOf('```');
+        if (firstNewline !== -1 && lastBacktick !== -1 && lastBacktick > firstNewline) {
+          cleanJson = cleanJson.substring(firstNewline + 1, lastBacktick).trim();
+        }
+      }
+
+      return JSON.parse(cleanJson);
     } catch (err) {
       console.error('AI fix generation failed:', err.message);
       return null;
@@ -92,7 +133,18 @@ Respond with ONLY the JSON array, no markdown.`;
 
     try {
       const response = await this._callApi(prompt);
-      const parsed = JSON.parse(response);
+      
+      // Strip out markdown formatting if the model wrapped the response in ```json ... ```
+      let cleanJson = response.trim();
+      if (cleanJson.startsWith('```')) {
+        const firstNewline = cleanJson.indexOf('\n');
+        const lastBacktick = cleanJson.lastIndexOf('```');
+        if (firstNewline !== -1 && lastBacktick !== -1 && lastBacktick > firstNewline) {
+          cleanJson = cleanJson.substring(firstNewline + 1, lastBacktick).trim();
+        }
+      }
+
+      const parsed = JSON.parse(cleanJson);
       return Array.isArray(parsed) ? parsed.map(issue => ({
         ...issue,
         id: `AI-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,

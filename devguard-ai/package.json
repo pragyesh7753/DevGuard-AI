@@ -4,6 +4,7 @@
   "description": "AI-powered intelligent code review and security assistant — tracks changes, detects vulnerabilities, and suggests fixes in real time.",
   "version": "0.1.0",
   "publisher": "devguard",
+  "icon": "assets/logo.png",
   "engines": {
     "vscode": "^1.93.0"
   },
