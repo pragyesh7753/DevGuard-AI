@@ -1,43 +1,111 @@
 {
   "name": "devguard-ai",
   "displayName": "DevGuard AI",
-  "description": "Extension for code review and suggestion through AI",
-  "version": "0.0.1",
+  "description": "AI-powered intelligent code review and security assistant — tracks changes, detects vulnerabilities, and suggests fixes in real time.",
+  "version": "0.1.0",
+  "publisher": "devguard",
   "engines": {
-    "vscode": "^1.118.0"
+    "vscode": "^1.93.0"
   },
   "categories": [
+    "Linters",
     "Other"
   ],
+  "keywords": [
+    "security",
+    "code review",
+    "AI",
+    "vulnerability",
+    "devguard"
+  ],
   "activationEvents": [
-    "onCommand:devguard-ai.openPanel"
+    "onStartupFinished"
   ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {
         "command": "devguard-ai.openPanel",
-        "title": "Open DevGuard AI"
+        "title": "DevGuard AI: Open Dashboard"
+      },
+      {
+        "command": "devguard-ai.runAnalysis",
+        "title": "DevGuard AI: Run Analysis on Current File"
+      },
+      {
+        "command": "devguard-ai.clearHistory",
+        "title": "DevGuard AI: Clear Save History"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devguard-ai-sidebar",
+          "title": "DevGuard AI",
+          "icon": "media/shield.svg"
+        }
+      ]
+    },
+    "views": {
+      "devguard-ai-sidebar": [
+        {
+          "type": "webview",
+          "id": "devguard-ai.sidebarView",
+          "name": "DevGuard AI"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DevGuard AI",
+      "properties": {
+        "devguardAI.sambanovaApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "SambaNova API key for AI-powered analysis. Leave empty to use rule-based analysis only.",
+          "order": 1
+        },
+        "devguardAI.sambanovaModel": {
+          "type": "string",
+          "default": "DeepSeek-V3",
+          "description": "SambaNova model to use for analysis.",
+          "order": 2
+        },
+        "devguardAI.autoAnalyzeOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically run analysis when a file is saved.",
+          "order": 3
+        },
+        "devguardAI.historyRetentionDays": {
+          "type": "number",
+          "default": 7,
+          "description": "Number of days to retain file save history.",
+          "order": 4
+        },
+        "devguardAI.enableTerminalTracking": {
+          "type": "boolean",
+          "default": true,
+          "description": "Track terminal commands and their file system effects.",
+          "order": 5
+        }
+      }
+    }
   },
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "build:webview": "cd webview && npm run build"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "@types/vscode": "^1.118.0",
+    "@types/vscode": "^1.93.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.39.3"
   },
   "dependencies": {
-    "fs": "^0.0.1-security",
-    "fs-extra": "^11.3.4",
-    "path": "^0.12.7",
-    "vscode": "^1.1.37"
+    "fs-extra": "^11.3.4"
   }
 }

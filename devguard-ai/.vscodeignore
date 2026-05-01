@@ -1,6 +1,14 @@
 .vscode/**
 .vscode-test/**
 test/**
+webview/src/**
+webview/node_modules/**
+webview/public/**
+webview/*.config.*
+webview/package-lock.json
+webview/eslint.config.js
+webview/.gitignore
+webview/README.md
 .gitignore
 .yarnrc
 vsc-extension-quickstart.md
@@ -8,3 +16,4 @@ vsc-extension-quickstart.md
 **/*.map
 **/eslint.config.mjs
 **/.vscode-test.*
+node_modules/@types/**

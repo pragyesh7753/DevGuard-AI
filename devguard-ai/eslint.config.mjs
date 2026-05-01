@@ -1,6 +1,8 @@
 import globals from "globals";
 
 export default [{
+    ignores: ["webview/**", "node_modules/**"],
+}, {
     files: ["**/*.js"],
     languageOptions: {
         globals: {
@@ -10,7 +12,7 @@ export default [{
         },
 
         ecmaVersion: 2022,
-        sourceType: "module",
+        sourceType: "commonjs",
     },
 
     rules: {
