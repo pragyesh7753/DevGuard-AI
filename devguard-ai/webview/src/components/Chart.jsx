@@ -8,18 +8,26 @@ export default function Chart({ summary }) {
     .filter(d => d.count > 0);
 
   const total = data.reduce((s, d) => s + d.count, 0);
-  const size = 120;
-  const strokeWidth = 14;
+  const size = 140;
+  const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
   let offset = 0;
 
   return (
-    <div className="dg-chart-container">
-      <div className="dg-chart-title">Issue Distribution</div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <div className="flex flex-col sm:flex-row items-center gap-10">
+      <div className="relative group">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            className="text-slate-800"
+            strokeWidth={strokeWidth}
+          />
           {data.map((d) => {
             const pct = d.count / total;
             const dashLength = pct * circumference;
@@ -37,41 +45,36 @@ export default function Chart({ summary }) {
                 strokeWidth={strokeWidth}
                 strokeDasharray={`${dashLength} ${circumference - dashLength}`}
                 strokeDashoffset={dashOffset}
-                strokeLinecap="round"
-                style={{ transition: 'all 0.5s ease' }}
+                strokeLinecap="butt"
+                className="transition-all duration-700 ease-out"
               />
             );
           })}
-          <text
-            x={size / 2}
-            y={size / 2 - 4}
-            textAnchor="middle"
-            fill="var(--dg-text-primary)"
-            fontSize="22"
-            fontWeight="700"
-          >
-            {total}
-          </text>
-          <text
-            x={size / 2}
-            y={size / 2 + 14}
-            textAnchor="middle"
-            fill="var(--dg-text-muted)"
-            fontSize="10"
-          >
-            issues
-          </text>
         </svg>
-
-        <div className="dg-chart-legend" style={{ flexDirection: 'column', gap: '6px' }}>
-          {data.map(d => (
-            <div key={d.key} className="dg-chart-legend-item">
-              <span className="dg-chart-legend-dot" style={{ background: d.color }} />
-              <span>{d.label}</span>
-              <span style={{ fontWeight: 600, color: d.color }}>{d.count}</span>
-            </div>
-          ))}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-2xl font-bold tracking-tight text-text-base">{total}</span>
+          <span className="text-[10px] font-medium uppercase tracking-widest text-text-dim">Total</span>
         </div>
+      </div>
+
+      <div className="flex-1 w-full space-y-3">
+        {data.map(d => (
+          <div key={d.key} className="flex items-center justify-between group/item">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full" style={{ background: d.color }} />
+              <span className="text-xs font-medium text-text-secondary group-hover/item:text-text-base transition-colors">{d.label}</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden hidden md:block">
+                <div 
+                  className="h-full rounded-full transition-all duration-1000" 
+                  style={{ background: d.color, width: `${(d.count / total) * 100}%` }}
+                />
+              </div>
+              <span className="text-[11px] font-bold min-w-[20px] text-right" style={{ color: d.color }}>{d.count}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import TabBar from './components/TabBar';
 import IssueCard from './components/IssueCard';
 import FileTimeline from './components/FileTimeline';
 import TerminalLog from './components/TerminalLog';
+import Visualization from './components/Visualization';
+
 
 const EMPTY_SUMMARY = { total: 0, critical: 0, high: 0, medium: 0, low: 0, info: 0, byCategory: {} };
 
@@ -53,20 +55,14 @@ export default function App() {
     postMessage('issueAction', { issue, action });
   };
 
-  // Filter issues based on active view/tab
   const getFilteredIssues = () => {
     let filtered = issues;
-
-    // If we're on a category sidebar view
     if (['security', 'performance', 'quality', 'bugs'].includes(activeView)) {
       filtered = issues.filter(i => i.category === activeView);
     }
-
-    // If we're using the tab bar filter on dashboard
     if (activeView === 'dashboard' && activeTab !== 'all') {
       filtered = issues.filter(i => i.category === activeTab);
     }
-
     return filtered;
   };
 
@@ -78,88 +74,97 @@ export default function App() {
   };
 
   const renderContent = () => {
-    if (activeView === 'files') {
-      return <FileTimeline timeline={timeline} />;
-    }
-
-    if (activeView === 'terminal') {
-      return <TerminalLog commands={commands} />;
-    }
+    if (activeView === 'files') return <FileTimeline timeline={timeline} />;
+    if (activeView === 'terminal') return <TerminalLog commands={commands} />;
+    if (activeView === 'visualization') return <Visualization commands={commands} />;
 
     if (activeView === 'dashboard') {
       return (
-        <>
-          <Dashboard
-            issues={getFilteredIssues()}
-            summary={summary}
-            gitSummary={gitSummary}
-            timeline={timeline}
-            onFix={handleFix}
-          />
-        </>
+        <Dashboard
+          issues={getFilteredIssues()}
+          summary={summary}
+          gitSummary={gitSummary}
+          timeline={timeline}
+          onFix={handleFix}
+        />
       );
     }
 
-    // Category view (security, performance, quality, bugs)
     const filtered = getFilteredIssues();
     if (filtered.length === 0) {
       return (
-        <div className="dg-empty">
-          <div className="dg-empty-icon">✨</div>
-          <h3>No {activeView} issues found</h3>
-          <p>Great job! No issues detected in this category.</p>
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="text-4xl mb-4 opacity-40">✨</div>
+          <h3 className="text-base font-semibold text-text-base">No {activeView} issues found</h3>
+          <p className="text-sm text-text-muted mt-1">Great job! No issues detected in this category.</p>
         </div>
       );
     }
 
     return (
-      <div>
-        <div className="dg-section-title">
-          {filtered.length} {activeView} issue{filtered.length !== 1 ? 's' : ''}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-dim mb-4">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+          {filtered.length} {activeView} issue{filtered.length !== 1 ? 's' : ''} detected
         </div>
-        {filtered.map((issue, i) => (
-          <IssueCard key={`${issue.id}-${issue.line}-${i}`} issue={issue} onFix={handleFix} />
-        ))}
+        <div className="space-y-2">
+          {filtered.map((issue, i) => (
+            <IssueCard key={`${issue.id}-${issue.line}-${i}`} issue={issue} onFix={handleFix} />
+          ))}
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="dg-layout">
+    <div className="flex w-full min-h-screen bg-bg-base text-text-base">
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
 
-      <div className="dg-main">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Header */}
-        <div className="dg-header">
-          <div className="dg-header-title">
-            <div className="dg-logo">
+        <header className="h-14 flex items-center justify-between px-6 border-b border-border-base shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 bg-primary rounded flex items-center justify-center text-white">
               <Shield size={14} />
             </div>
-            <h1>DevGuard AI</h1>
-            {analyzing && <span className="dg-pulse" />}
+            <h1 className="text-sm font-semibold tracking-tight">DevGuard AI</h1>
+            {analyzing && (
+              <div className="flex items-center gap-2 px-2 py-0.5 rounded-full bg-primary/10 text-[10px] font-medium text-primary border border-primary/20">
+                <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+                Analyzing
+              </div>
+            )}
           </div>
-          <div className="dg-header-actions">
-            <button className="dg-btn dg-btn-primary" onClick={handleRunAnalysis}>
-              <RefreshCw size={12} />
-              Analyze
+          <div className="flex items-center gap-2">
+            <button 
+              className="btn btn-primary h-8 px-3 text-xs" 
+              onClick={handleRunAnalysis}
+              disabled={analyzing}
+            >
+              <RefreshCw size={12} className={analyzing ? 'animate-spin' : ''} />
+              Run Analysis
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Tab Bar (only on dashboard) */}
+        {/* View Specific Tabs */}
         {activeView === 'dashboard' && (
-          <TabBar
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            issueCounts={issueCounts}
-          />
+          <div className="px-6 border-b border-border-base shrink-0">
+            <TabBar
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              issueCounts={issueCounts}
+            />
+          </div>
         )}
 
-        {/* Content */}
-        <div className="dg-content">
-          {renderContent()}
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            {renderContent()}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
-}
+}

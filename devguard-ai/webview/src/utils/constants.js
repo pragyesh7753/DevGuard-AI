@@ -21,7 +21,9 @@ export const NAV_ITEMS = [
   { id: 'bugs',        label: 'Bug Risk',    icon: 'Bug' },
   { id: 'files',       label: 'Files',       icon: 'FileText' },
   { id: 'terminal',    label: 'Terminal',     icon: 'Terminal' },
+  { id: 'visualization', label: 'Visualization', icon: 'BarChart3' },
 ];
+
 
 export function timeAgo(timestamp) {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);

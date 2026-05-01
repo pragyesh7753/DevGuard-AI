@@ -1,7 +1,9 @@
+/* global acquireVsCodeApi */
 import { useState, useEffect, useCallback } from 'react';
 
 // @ts-ignore — acquireVsCodeApi is injected by VS Code webview runtime
 const vscodeApi = typeof acquireVsCodeApi !== 'undefined' ? acquireVsCodeApi() : null;
+
 
 /**
  * Hook for communicating with the VS Code extension host.
