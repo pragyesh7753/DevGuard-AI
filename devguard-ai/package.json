@@ -1,9 +1,9 @@
 {
   "name": "devguard-ai",
-  "displayName": "DevGuard AI",
+  "displayName": "DevGuard AI - Catch issues before they cross the line",
   "description": "AI-powered intelligent code review and security assistant — tracks changes, detects vulnerabilities, and suggests fixes in real time.",
-  "version": "0.1.0",
-  "publisher": "devguard",
+  "version": "1.0.0",
+  "publisher": "PragyeshKumarSeth",
   "license": "MIT",
   "homepage": "https://github.com/pragyesh7753/DevGuard-AI#readme",
   "repository": {
